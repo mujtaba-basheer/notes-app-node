@@ -1,8 +1,13 @@
 import { NextFunction, Request, Response } from "express";
-import { Query } from "mongoose";
+import { Types } from "mongoose";
 import Note from "../models/note";
 import AppError from "../utils/app-error";
-import { AddNoteDataT, JwtDecodedT } from "../index.d";
+import {
+  AddNoteDataT,
+  JwtDecodedT,
+  ReorderNotesDataT,
+  UpdateArrayT,
+} from "../index.d";
 
 export const addNote = async (
   req: Request & { user: JwtDecodedT },
@@ -10,12 +15,18 @@ export const addNote = async (
   next: NextFunction
 ) => {
   try {
-    const { title, description } = req.body as AddNoteDataT;
+    const { title, description, sl_no } = req.body as AddNoteDataT;
     const { _id } = req.user;
+
+    let priority: number = sl_no;
+    if (priority === undefined) {
+      priority = await Note.count({ user: _id });
+    }
 
     await Note.create({
       title,
       description,
+      priority,
       user: _id,
     });
 
@@ -68,10 +79,15 @@ export const getNotes = async (
     const { _id } = req.user;
 
     const query = Note.find({ user: _id })
-      .sort({ date_added: -1 })
-      .select("title description");
+      .sort({ priority: -1 })
+      .select("title description priority");
 
     const notes = await query.exec();
+    notes.forEach((note) => {
+      if (note.description.length > 100) {
+        note.description = note.description.substring(0, 99) + "...";
+      }
+    });
 
     res.status(200).json({
       status: "success",
@@ -112,7 +128,7 @@ export const getNoteById = async (
   }
 };
 
-export const deletNoteById = async (
+export const deleteNoteById = async (
   req: Request & { user: JwtDecodedT },
   res: Response,
   next: NextFunction
@@ -127,6 +143,37 @@ export const deletNoteById = async (
     res.status(200).json({
       status: "success",
       message: "Note deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return next(new AppError(error.message, 501));
+  }
+};
+
+export const reorderNotes = async (
+  req: Request & { user: JwtDecodedT },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { _id: userId } = req.user;
+    const order = req.body as ReorderNotesDataT;
+
+    const updateArray: UpdateArrayT = order.map((info) => ({
+      updateOne: {
+        filter: {
+          _id: new Types.ObjectId(info._id),
+          user: userId,
+        },
+        update: {
+          priority: info.priority,
+        },
+      },
+    }));
+    await Note.bulkWrite(updateArray);
+
+    res.status(200).json({
+      status: "success",
     });
   } catch (error) {
     console.error(error);

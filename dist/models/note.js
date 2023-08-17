@@ -14,6 +14,10 @@ const noteSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "User",
     },
+    priority: {
+        type: Number,
+        required: [true, "Priority is required"],
+    },
     date_added: Date,
     last_modified: Date,
 });

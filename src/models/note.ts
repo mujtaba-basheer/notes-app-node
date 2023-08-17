@@ -4,6 +4,7 @@ interface NoteI {
   title: string;
   description: string;
   user: ObjectId;
+  priority: number;
   date_added: Date;
   last_modified: Date;
 }
@@ -20,6 +21,10 @@ const noteSchema = new Schema<NoteI, Model<NoteI, any, any>>({
   user: {
     type: Schema.Types.ObjectId,
     ref: "User",
+  },
+  priority: {
+    type: Number,
+    required: [true, "Priority is required"],
   },
   date_added: Date,
   last_modified: Date,

@@ -62,8 +62,8 @@ export const login = async (
 };
 
 export const logout = (req: Request, res: Response) => {
-  res.cookie("jwt", "loggedout", {
-    expires: new Date(Date.now() + 10 * 1000),
+  res.clearCookie("jwt", {
+    expires: new Date(Date.now()),
     httpOnly: true,
   });
   res.status(200).json({ status: "success" });

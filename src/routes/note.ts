@@ -4,7 +4,8 @@ import {
   getNotes,
   getNoteById,
   editNote,
-  deletNoteById,
+  deleteNoteById,
+  reorderNotes,
 } from "../controllers/note";
 import { protect } from "../middleware/auth";
 
@@ -12,6 +13,9 @@ const noteRouter = Router();
 
 // add a note
 noteRouter.post("/", protect, addNote);
+
+// reorder notes
+noteRouter.put("/reorder", protect, reorderNotes);
 
 // edit a note
 noteRouter.put("/:id", protect, editNote);
@@ -23,6 +27,6 @@ noteRouter.get("/", protect, getNotes);
 noteRouter.get("/:id", protect, getNoteById);
 
 // delete a note by id
-noteRouter.delete("/:id", protect, deletNoteById);
+noteRouter.delete("/:id", protect, deleteNoteById);
 
 export default noteRouter;

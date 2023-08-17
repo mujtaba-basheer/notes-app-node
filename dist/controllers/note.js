@@ -1,15 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletNoteById = exports.getNoteById = exports.getNotes = exports.editNote = exports.addNote = void 0;
+exports.reorderNotes = exports.deleteNoteById = exports.getNoteById = exports.getNotes = exports.editNote = exports.addNote = void 0;
+const mongoose_1 = require("mongoose");
 const note_1 = require("../models/note");
 const app_error_1 = require("../utils/app-error");
 const addNote = async (req, res, next) => {
     try {
-        const { title, description } = req.body;
+        const { title, description, sl_no } = req.body;
         const { _id } = req.user;
+        let priority = sl_no;
+        if (priority === undefined) {
+            priority = await note_1.default.count({ user: _id });
+        }
         await note_1.default.create({
             title,
             description,
+            priority,
             user: _id,
         });
         res.status(201).json({
@@ -49,9 +55,14 @@ const getNotes = async (req, res, next) => {
     try {
         const { _id } = req.user;
         const query = note_1.default.find({ user: _id })
-            .sort({ date_added: -1 })
-            .select("title description");
+            .sort({ priority: -1 })
+            .select("title description priority");
         const notes = await query.exec();
+        notes.forEach((note) => {
+            if (note.description.length > 100) {
+                note.description = note.description.substring(0, 99) + "...";
+            }
+        });
         res.status(200).json({
             status: "success",
             data: notes,
@@ -87,7 +98,7 @@ const getNoteById = async (req, res, next) => {
     }
 };
 exports.getNoteById = getNoteById;
-const deletNoteById = async (req, res, next) => {
+const deleteNoteById = async (req, res, next) => {
     try {
         const { _id: userId } = req.user;
         const { id: noteId } = req.params;
@@ -103,4 +114,30 @@ const deletNoteById = async (req, res, next) => {
         return next(new app_error_1.default(error.message, 501));
     }
 };
-exports.deletNoteById = deletNoteById;
+exports.deleteNoteById = deleteNoteById;
+const reorderNotes = async (req, res, next) => {
+    try {
+        const { _id: userId } = req.user;
+        const order = req.body;
+        const updateArray = order.map((info) => ({
+            updateOne: {
+                filter: {
+                    _id: new mongoose_1.Types.ObjectId(info._id),
+                    user: userId,
+                },
+                update: {
+                    priority: info.priority,
+                },
+            },
+        }));
+        await note_1.default.bulkWrite(updateArray);
+        res.status(200).json({
+            status: "success",
+        });
+    }
+    catch (error) {
+        console.error(error);
+        return next(new app_error_1.default(error.message, 501));
+    }
+};
+exports.reorderNotes = reorderNotes;

@@ -1,3 +1,5 @@
+import { FilterQuery, UpdateQuery } from "mongoose";
+
 export type UserRegisterDataT = {
   fname: string;
   lname?: string;
@@ -34,4 +36,17 @@ export type NoteT = {
 export type AddNoteDataT = {
   title: string;
   description: string;
+  sl_no: number;
 };
+
+export type ReorderNotesDataT = {
+  _id: string;
+  priority: string;
+}[];
+
+export type UpdateArrayT = {
+  updateOne: {
+    filter: FilterQuery;
+    update: UpdateQuery;
+  };
+}[];
