@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const merchandise_1 = require("../apis/merchandise");
+const merchandise = (0, express_1.Router)();
+merchandise.get("/products", merchandise_1.getProducts);
+merchandise.get("/product", merchandise_1.getSingleProduct);
+merchandise.post("/merch-user-cart", merchandise_1.saveMerchUserAndCart);
+merchandise.post("/edit-address", merchandise_1.editAddress);
+merchandise.post("/proceed-to-pay/verify", merchandise_1.verifyPayment);
+merchandise.post("/order-status", merchandise_1.orderStatus);
+merchandise.post("/check-coupon", merchandise_1.checkCoupon);
+merchandise.get("/get-coupon", merchandise_1.getCoupon);
+exports.default = merchandise;
