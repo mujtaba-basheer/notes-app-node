@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "concurrently --kill-others \"npx tsc -w\" \"npm run server\"",
+    "build": "npx tsc",
     "server": "nodemon dist/server.js",
     "prod": "node dist/server.js"
   },

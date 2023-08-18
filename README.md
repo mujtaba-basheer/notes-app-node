@@ -1,18 +1,29 @@
-# tuf-backend
+# Notes App Backend
 
-Log in amazon aws account. 
+## Description
 
-https://signin.aws.amazon.com/
-write4tuf@gmail.com
-1234subh@DAS
+This is a Node.js backend project for the notes app. The project has been written in TypeScript.
 
-go to the instance. 
+---
 
-cd into the directory 
+## Running the project
 
-pm2 stop all 
-git pull 
-pm2 restart all 
+To run the project, run the following commands in the root directory
 
+Install the node dependencies
 
-Following these steps we can deploy our new changes. 
+```
+npm ci
+```
+
+Build the typescript project
+
+```
+npm run build
+```
+
+Start the server
+
+```
+node dist/index.js
+```
